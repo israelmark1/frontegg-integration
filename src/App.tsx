@@ -5,12 +5,16 @@ import {
   useAuth,
   useLoginWithRedirect,
   ContextHolder,
+  useAuthActions,
 } from "@frontegg/react";
 
 function App() {
+  const { switchTenant } = useAuthActions();
   const { user, isAuthenticated } = useAuth();
   const loginWithRedirect = useLoginWithRedirect();
-  const [selectedTenant, setSelectedTenant] = useState<string | undefined>();
+  const [selectedTenant, setSelectedTenant] = useState<string | undefined>(
+    user?.tenantId
+  );
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -28,19 +32,25 @@ function App() {
     AdminPortal.openHosted();
   };
 
-  const handleTenantChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleTenantChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const tenantId = event.target.value;
-    setSelectedTenant(tenantId);
-    loginWithRedirect({ tenantId });
+    try {
+      setSelectedTenant(tenantId);
+      await switchTenant({ tenantId });
+
+      console.log("Switched to tenant:", tenantId);
+    } catch (error) {
+      console.error(`Error switching tenant: ${error}`);
+    }
   };
 
   return (
     <div>
-      {/* Settings Button Outside the App Container */}
       <button onClick={handleClick} className="settings-button">
         Settings
       </button>
-
       <div className="App">
         {isAuthenticated ? (
           <div className="logged-in">
@@ -56,8 +66,6 @@ function App() {
                 <span>Logged in as: {user?.name}</span>
               </div>
             </div>
-
-            {/* Tenant Switcher Dropdown */}
             {user?.tenants && (
               <div className="tenant-switcher">
                 <label htmlFor="tenant-select">Tenants:</label>
