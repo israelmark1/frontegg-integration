@@ -11,7 +11,7 @@ const contextOptions = {
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
-    <FronteggProvider contextOptions={contextOptions} hostedLoginBox={false}>
+    <FronteggProvider contextOptions={contextOptions} hostedLoginBox={true}>
       <App />
     </FronteggProvider>
 );
